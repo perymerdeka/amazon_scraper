@@ -3,14 +3,19 @@ from typing import Any
 
 from fake_useragent import UserAgent as ua
 from rich import print_json
+from bs4 import BeautifulSoup
+from os.path import join
+
+
+from core.settings.base import BASE_DIR
 
 class AmazonSpider(object):
     def __init__(self) -> None:
         self.base_url: str = "https://www.amazon.co.uk/s"
         self.client: Client = Client(headers={"User-Agent": ua.random})
 
-    def get_page(self):
-        payload: dict[str, Any] = {
+    def get_response(self, params: dict[str, Any]) -> str:
+        params: dict[str, Any] = {
             "k": "keyboard cleaner",
             "crid": "3I7W6DAZVIT0Z",
             "sprefix": "keyboard,aps,630",
@@ -18,8 +23,22 @@ class AmazonSpider(object):
         }
 
         response = self.client.get(
-            self.base_url,
+            self.base_url, params=params
         )
+
+        # save html file
+        f = open(join(BASE_DIR, "response.html"))
+        f.write(response.text)
+        f.close()
+
+        # soup object
+        soup: BeautifulSoup = BeautifulSoup(response.text)
+        return soup
+    
+    
+    def get_pages(self, soup: BeautifulSoup):
+        contents = soup.find()
+
 
     def get_suggest(self):
         suggest_url: str = "https://completion.amazon.co.uk/api/2017/suggestions?"
