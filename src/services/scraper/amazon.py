@@ -1,7 +1,7 @@
 from httpx import Client
 from typing import Any
 
-from fake_useragent import UserAgent as ua
+from fake_useragent import UserAgent
 from rich import print_json
 from bs4 import BeautifulSoup
 from os.path import join
@@ -12,7 +12,8 @@ from core.settings.base import BASE_DIR
 class AmazonSpider(object):
     def __init__(self) -> None:
         self.base_url: str = "https://www.amazon.co.uk/s"
-        self.client: Client = Client(headers={"User-Agent": ua.random})
+        self.ua: UserAgent = UserAgent()
+        self.client: Client = Client(headers={"User-Agent": self.ua.random})
 
     def get_response(self, params: dict[str, Any]) -> str:
         params: dict[str, Any] = {
@@ -37,7 +38,8 @@ class AmazonSpider(object):
     
     
     def get_pages(self, soup: BeautifulSoup):
-        contents = soup.find()
+        contents = soup.prettify()
+        print(contents)
 
 
     def get_suggest(self):
@@ -70,3 +72,8 @@ class AmazonSpider(object):
             print_json(response.json())
         else:
             pass
+    
+    def run(self):
+        with open(join(BASE_DIR, 'response.html'), 'r') as f:
+            soup: BeautifulSoup = BeautifulSoup(f.read(), 'html.parser')
+            self.get_pages(soup=soup)
