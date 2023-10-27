@@ -1,8 +1,9 @@
 import httpx
 from httpx import Client
+from rich import print
 from typing import Any
 
-from services.scraper.amazon import AmazonSpider
+from services.scraper.runner import Runner
 
 def main():
     headers: dict[str, Any] = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"}
@@ -18,8 +19,8 @@ def main():
         print(response.status_code)
 
 def run():
-    spider: AmazonSpider = AmazonSpider()
-    spider.run()
+    spider: Runner = Runner()
+    data = spider.search_product("laptop")
 
 if __name__ == '__main__':
     run()

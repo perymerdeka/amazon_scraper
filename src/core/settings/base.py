@@ -10,10 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import sys
+
+from loguru import logger
+from rich.logging import RichHandler
+from rich import traceback
 from pathlib import Path
+from os.path import join
+from logging.config import dictConfig
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+
+# LOG FILE PATH
+LOG_FILE_PATH = join(join(BASE_DIR, "log"), "app.log")
 
 
 # Quick-start development settings - unsuitable for production
@@ -127,3 +137,77 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'django.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+# # Konfigurasi logger Django
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "handlers": {
+#         "console": {
+#             "level": "DEBUG",
+#             "class": "logging.StreamHandler",
+#             "formatter": "verbose",
+#         },
+#         "file": {
+#             "level": "DEBUG",
+#             "class": "logging.FileHandler",
+#             "filename": LOG_FILE_PATH,
+#             "formatter": "verbose",
+#         },
+#         "rich_console": {
+#             "level": "DEBUG",
+#             "class": "rich.logging.RichHandler",
+#             "formatter": "verbose",
+#         },
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": ["rich_console", "file"],
+#             "level": "DEBUG",
+#             "propagate": True,  # Set propagate ke False untuk menghentikan penanganan ganda
+#         },
+#     },
+#     "formatters": {
+#         "verbose": {
+#             # "()": "rich.logging.RichFormatter",
+#             "format": "{levelname} {asctime} {module} {message}",
+#             "style": "{",
+#         },
+#         "rich": {
+#             # "()": "rich.logging.RichFormatter",
+#             "format": "{message}",
+#             "style": "{",
+#         },
+#     },
+# }
+
+# # Hapus handler default (jika ada)
+# if 'django' in LOGGING['loggers']:
+#     LOGGING['loggers']['django']['handlers'] = []
+
+# # Tambahkan handler Loguru ke logger Django
+# dictConfig(LOGGING)
+
