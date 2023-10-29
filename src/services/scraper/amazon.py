@@ -104,7 +104,7 @@ class AmazonSpider(object):
             logger.info(
                 "Writing Response file: {} ".format(join(BASE_DIR, "response.html"))
             )
-
+        
         # soup object
         
         soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
@@ -181,6 +181,11 @@ class AmazonSpider(object):
         logger.info("Process Product Detail on URL: {}".format(response.url))
 
         soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
+
+        # save html file
+        f = open(join(BASE_DIR, "response_detail.html"), "w+")
+        f.write(response.text)
+        f.close()
 
         contents = soup.find(
             "div", attrs={"class": "a-section a-spacing-small a-spacing-top-small"}
