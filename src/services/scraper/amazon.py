@@ -1,4 +1,5 @@
-import httpx
+import httpx, requests
+import ssl, certifi
 
 from httpx import Client
 from typing import Any
@@ -19,40 +20,105 @@ class AmazonSpider(object):
     def __init__(self) -> None:
         self.base_url: str = "https://www.amazon.co.uk/s"
         self.ua: UserAgent = UserAgent()
-        self.client: Client = Client(headers={"User-Agent": self.ua.random})
+        self.context = ssl.create_default_context()
+        self.context.load_verify_locations(certifi.where())
+        self.client: Client = Client(
+            headers={"User-Agent": self.ua.random}, verify=self.context
+        )
 
-    def get_response(self, query: str, page_number: int=1) -> str:
+    def get_response(self, query: str, page_number: int = 1):
         params: dict[str, Any] = {
-            "k": "{}".format(query),
-            "page": "{}".format(page_number),
-            "qid": "1698415335",
-            "ref": "sr_pg_2",
-        }
+                "k": "{}".format(query),
+                "page": "{}".format(page_number),
+                "crid": "1ASBLLMQBJ4YW",
+                "qid": "1698551383",
+                "sprefix": "{},aps,504".format(query),
+                "ref": "sr_pg_{}".format(page_number),
+            }
 
-        response = self.client.get(self.base_url, params=params)
+        try:
+            print("Use httpx Module")
+            response = self.client.get(self.base_url, params=params)
+            if response == 200:
+                logger.info(
+                    "Process URL: {} Status {}".format(
+                        response.url, response.status_code
+                    )
+                )
 
-        logger.info("Process URL: {}".format(response.url))
+                # save html file
+                f = open(join(BASE_DIR, "response.html"), "w+")
+                f.write(response.text)
+                f.close()
 
+                print(
+                    "Writing Response file: {} ".format(join(BASE_DIR, "response.html"))
+                )
 
-        # save html file
-        f = open(join(BASE_DIR, "response.html"), "w+t")
-        f.write(response.text)
-        f.close()
+                # soup object
+                soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
+                return soup
 
-        logger.info("Writing Response file: {} ".format(join(BASE_DIR, "response.html")))
+            elif response.status_code == 503:
+                logger.info("Module Changed: Using requests module")
+
+                response = httpx.get(
+                    self.base_url,
+                    params=params,
+                    headers={"User-Agent": self.ua.chrome},
+                    follow_redirects=True,
+                )
+                logger.info(
+                    "Try to Process URL {} Status: {}".format(response.url, response.status_code)
+                )
+
+                # save html file
+                f = open(join(BASE_DIR, "res.html"), "w+")
+                f.write(response.text)
+                f.close()
+
+                logger.info(
+                    "Writing Response file: {} ".format(join(BASE_DIR, "response.html"))
+                )
+
+                # soup object
+                soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
+                return soup
+        except:
+            print("Error when using httpx, use requests module")
+            response = requests.get(
+                self.base_url, params=params, headers={"User-Agent": self.ua.chrome}
+            )
+
+            logger.error(
+                "Returned Error: Try to Process URL {} Status: {}".format(
+                    response.url, response.status_code
+                )
+            )
+
+            # save html file
+            f = open(join(BASE_DIR, "res_error.html"), "w+")
+            f.write(response.text)
+            f.close()
+
+            logger.info(
+                "Writing Response file: {} ".format(join(BASE_DIR, "response.html"))
+            )
 
         # soup object
+        
         soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
         return soup
+
 
     def get_product(self, soup: BeautifulSoup) -> list[dict[str, Any]]:
         logger.info("Get Product ")
         products: list[dict[str, Any]] = []
-        contents = soup.find_all("div", attrs={"data-component-type": "s-search-result"})
+        contents = soup.find_all(
+            "div", attrs={"data-component-type": "s-search-result"}
+        )
         logger.info("Total Data Scraped: {}".format(len(contents)))
-        
-        
-        
+
         for content in contents:
             title = (
                 content.find("h2", attrs={"class": "s-line-clamp-2"})
@@ -60,7 +126,7 @@ class AmazonSpider(object):
                 .text.strip()
             )
             product_link = (
-                "https://www.amazon.co.uk/"
+                "https://www.amazon.co.uk"
                 + content.find(
                     "a", attrs={"class": "a-link-normal", "class": "s-no-outline"}
                 )["href"]
@@ -81,7 +147,7 @@ class AmazonSpider(object):
                     "asin": asin,
                     "uuid": uuid,
                     "product image": product_image,
-                    "price": price
+                    "price": price,
                 }
             else:
                 data_dict: dict[str, Any] = {
@@ -90,29 +156,19 @@ class AmazonSpider(object):
                     "asin": asin,
                     "uuid": uuid,
                     "product image": product_image,
-                    "price": "no price available"
+                    "price": "no price available",
                 }
             products.append(data_dict)
 
         return products
 
     def get_page_number(self, soup: BeautifulSoup):
-        pages = (
-            soup.find(
-                "div",
-                attrs={
-                    "class": "a-section a-text-center s-pagination-container",
-                    "role": "navigation",
-                },
-            )
-            .find("span", attrs={"class": "s-pagination-strip"})
-            .find(
-                "span",
-                attrs={
-                    "class": "s-pagination-item s-pagination-disabled",
-                    "aria-disabled": "true",
-                },
-            )
+        pages = soup.find("span", attrs={"class": "s-pagination-strip"}).find(
+            "span",
+            attrs={
+                "class": "s-pagination-item s-pagination-disabled",
+                "aria-disabled": "true",
+            },
         )
         page = int(pages.text.strip())
         print("Total Page Number: {}".format(page))
@@ -121,7 +177,7 @@ class AmazonSpider(object):
     def get_product_detail(self, url: str):
         details: list = []
 
-        response = httpx.get(url=url, headers={"User-Agent": self.ua.random})
+        response = httpx.get(url=url, headers={"User-Agent": self.ua.random}, follow_redirects=True)
         logger.info("Process Product Detail on URL: {}".format(response.url))
 
         soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
@@ -133,8 +189,3 @@ class AmazonSpider(object):
             details.append(content.text.strip())
 
         return details
-
-    def run(self):
-        with open(join(BASE_DIR, "response.html"), "r") as f:
-            soup: BeautifulSoup = BeautifulSoup(f.read(), "html.parser")
-            self.get_page_number(soup=soup)

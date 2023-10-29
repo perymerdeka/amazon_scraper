@@ -25,6 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 # LOG FILE PATH
 LOG_FILE_PATH = join(join(BASE_DIR, "log"), "app.log")
 
+# REPORTS FILE PATH
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/

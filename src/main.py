@@ -21,6 +21,7 @@ def main():
 def run():
     spider: Runner = Runner()
     data = spider.search_product("laptop")
+    print(data)
 
 if __name__ == '__main__':
     run()
