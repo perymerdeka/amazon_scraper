@@ -29,7 +29,3 @@ class Runner(object):
                 all_products.append(product)
 
         return all_products
-    
-    def test_response(self, keyword: str, page_number: int = 1):
-        soup = self.spider.get_response(query=keyword, page_number=page_number)
-        print(soup)

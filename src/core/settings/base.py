@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'rest_framework',
 
     # installed apps
-    'apps.scraper',
+    'apps.api',
+    'apps.products',
 ]
 
 MIDDLEWARE = [
@@ -151,7 +152,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'django.log',
+            'filename': LOG_FILE_PATH,
         },
     },
     'loggers': {

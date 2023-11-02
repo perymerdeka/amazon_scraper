@@ -9,6 +9,7 @@ from fake_useragent import UserAgent
 from rich import print_json
 from bs4 import BeautifulSoup
 from os.path import join
+from os import makedirs
 from rich import print
 from loguru import logger
 
@@ -26,6 +27,9 @@ class AmazonSpider(object):
             headers={"User-Agent": self.ua.random}, verify=self.context
         )
 
+        # set Playwright browser
+        self.PLAYWRIGHT_BROWSERS_PATH = join(BASE_DIR, "temp")
+
     def get_response(self, query: str, page_number: int = 1):
         params: dict[str, Any] = {
                 "k": "{}".format(query),
@@ -37,7 +41,7 @@ class AmazonSpider(object):
             }
 
         try:
-            print("Use httpx Module")
+            logger.info("Use httpx Module")
             response = self.client.get(self.base_url, params=params)
             if response == 200:
                 logger.info(
@@ -57,6 +61,8 @@ class AmazonSpider(object):
 
                 # soup object
                 soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
+
+
                 return soup
 
             elif response.status_code == 503:
@@ -83,6 +89,7 @@ class AmazonSpider(object):
 
                 # soup object
                 soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
+
                 return soup
         except:
             print("Error when using httpx, use requests module")
@@ -97,13 +104,16 @@ class AmazonSpider(object):
             )
 
             # save html file
-            f = open(join(BASE_DIR, "res_error.html"), "w+")
+            f = open(join(BASE_DIR, "res_error.html"), "w+", encoding="UTF-8")
             f.write(response.text)
             f.close()
 
             logger.info(
                 "Writing Response file: {} ".format(join(BASE_DIR, "response.html"))
             )
+
+            # playwright handling
+            
         
         # soup object
         
@@ -177,13 +187,13 @@ class AmazonSpider(object):
     def get_product_detail(self, url: str):
         details: list = []
 
-        response = httpx.get(url=url, headers={"User-Agent": self.ua.random}, follow_redirects=True)
-        logger.info("Process Product Detail on URL: {}".format(response.url))
+        response = httpx.get(url=url, headers={"User-Agent": self.ua.random}, follow_redirects=True, verify=self.context)
+        logger.info("Process Product Detail on URL: {} Status {}".format(response.url, response.status_code))
 
         soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
 
         # save html file
-        f = open(join(BASE_DIR, "response_detail.html"), "w+")
+        f = open(join(BASE_DIR, "response_detail.html"), "w+", encoding="UTF-8")
         f.write(response.text)
         f.close()
 
