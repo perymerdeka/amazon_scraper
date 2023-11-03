@@ -29,3 +29,17 @@ class Runner(object):
                 all_products.append(product)
 
         return all_products
+    
+    def get_product_for_one_page(self, keyword: str, page_number: str):
+        all_products: list[dict[str, Any]] = []
+        logger.info("Process on page, {}".format(page_number))
+        response = self.spider.get_response(query=keyword, page_number=page_number)
+        products = self.spider.get_product(soup=response)
+
+        # scrape process
+        for product in products:
+            detail = self.spider.get_product_detail(url=product["product_link"])
+            product["detail product"] = detail
+            all_products.append(product)
+
+        return all_products
