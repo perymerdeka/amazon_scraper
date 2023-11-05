@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     # installed apps
     'apps.api',
     'apps.products',
+    'apps.users',
 ]
 
 MIDDLEWARE = [
@@ -164,53 +165,6 @@ LOGGING = {
     },
 }
 
-# # Konfigurasi logger Django
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "handlers": {
-#         "console": {
-#             "level": "DEBUG",
-#             "class": "logging.StreamHandler",
-#             "formatter": "verbose",
-#         },
-#         "file": {
-#             "level": "DEBUG",
-#             "class": "logging.FileHandler",
-#             "filename": LOG_FILE_PATH,
-#             "formatter": "verbose",
-#         },
-#         "rich_console": {
-#             "level": "DEBUG",
-#             "class": "rich.logging.RichHandler",
-#             "formatter": "verbose",
-#         },
-#     },
-#     "loggers": {
-#         "django": {
-#             "handlers": ["rich_console", "file"],
-#             "level": "DEBUG",
-#             "propagate": True,  # Set propagate ke False untuk menghentikan penanganan ganda
-#         },
-#     },
-#     "formatters": {
-#         "verbose": {
-#             # "()": "rich.logging.RichFormatter",
-#             "format": "{levelname} {asctime} {module} {message}",
-#             "style": "{",
-#         },
-#         "rich": {
-#             # "()": "rich.logging.RichFormatter",
-#             "format": "{message}",
-#             "style": "{",
-#         },
-#     },
-# }
 
-# # Hapus handler default (jika ada)
-# if 'django' in LOGGING['loggers']:
-#     LOGGING['loggers']['django']['handlers'] = []
-
-# # Tambahkan handler Loguru ke logger Django
-# dictConfig(LOGGING)
-
+# AUTH USER MODEL
+AUTH_USER_MODEL = 'users.UsersModel'
