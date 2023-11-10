@@ -28,6 +28,8 @@ playwright = "^1.39.0"
 django-allauth = "^0.58.1"
 djangorestframework-simplejwt = "^5.3.0"
 setuptools = "^68.2.2"
+drf-yasg = "^1.21.7"
+gunicorn = "^21.2.0"
 
 
 [build-system]
