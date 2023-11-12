@@ -1,20 +1,20 @@
-build-prod:
-	docker compose -f docker-compose-prod.yaml build --no-cache
+build:
+	docker compose -f docker-compose.yaml build --no-cache
 
 upd:
-	docker compose -f docker-compose-prod.yaml up -d
+	docker compose -f docker-compose.yaml up -d
 
 up:
-	docker compose -f docker-compose-prod.yml up
+	docker compose -f docker-compose.yaml up
 
-shell-prod:
-	docker compose -f docker-compose-prod.yml exec web bash
+shell:
+	docker compose -f docker-compose.yaml exec web bash
 
 makemigrations:
-	docker compose -f docker-compose-prod.yaml exec web su -c "python manage.py makemigrations --settings=core.settings.production"
+	docker compose -f docker-compose.yaml exec web su -c "python manage.py makemigrations --settings=core.settings.production"
 
 migrate:
-	docker compose -f docker-compose-prod.yaml exec web su -c "python manage.py migrate --settings=core.settings.production"
+	docker compose -f docker-compose.yaml exec web su -c "python manage.py migrate --settings=core.settings.production"
 
 destroy:
-	docker compose -f docker-compose-prod.yaml down
+	docker compose -f docker-compose.yaml down

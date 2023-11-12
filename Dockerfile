@@ -16,7 +16,7 @@ RUN ls /app
 WORKDIR /app
 
 RUN pip install --upgrade pip
-RUN pip install poetry
-RUN poetry install
 
 ADD . /app/
+RUN pip install poetry
+RUN poetry install
