@@ -12,7 +12,7 @@ class Runner(object):
         self.spider: AmazonSpider = spider
         self.extractor: Extractor = extractor
 
-    def search_product(self, keyword: str, page_number: int = 1):
+    def search_product(self, keyword: str, page_number: int = 1) -> list[dict[str, Any]]:
         all_products: list[dict[str, Any]] = []
         soup = self.spider.get_response(query=keyword, page_number=page_number)
         pages = self.spider.get_page_number(soup=soup)
@@ -30,7 +30,7 @@ class Runner(object):
 
         return all_products
     
-    def get_product_for_one_page(self, keyword: str, page_number: str):
+    def get_product_for_one_page(self, keyword: str, page_number: str) -> list[dict[str, Any]]:
         all_products: list[dict[str, Any]] = []
         logger.info("Process on page, {}".format(page_number))
         response = self.spider.get_response(query=keyword, page_number=page_number)
