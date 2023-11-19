@@ -19,6 +19,7 @@ from rich import traceback
 from pathlib import Path
 from os.path import join
 from logging.config import dictConfig
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
@@ -186,6 +187,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ]
+}
+
+# Simple JWT TimeConfig
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=5),  # Set the desired token expiration time
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=5),
 }
 
 # SOCIAL ACCOUNT

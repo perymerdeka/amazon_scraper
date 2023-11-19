@@ -18,5 +18,5 @@ WORKDIR /app
 RUN pip install --upgrade pip
 
 ADD . /app/
-RUN pip install poetry
+RUN pip install poetry charset-normalizer --no-cache-dir
 RUN poetry install
