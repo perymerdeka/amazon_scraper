@@ -29,6 +29,8 @@ LOG_FILE_PATH = join(join(BASE_DIR, "log"), "app.log")
 
 # REPORTS FILE PATH
 
+# Screenshoot path
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -144,6 +146,9 @@ STATIC_URL = 'static/'
 
 # Set the directory where `collectstatic` will gather your static files
 STATIC_ROOT = join(BASE_DIR, join("src", 'staticfiles'))
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = join(BASE_DIR, "media") 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

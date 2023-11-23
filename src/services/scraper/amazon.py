@@ -12,9 +12,10 @@ from os.path import join
 from os import makedirs
 from rich import print
 from loguru import logger
+from playwright.sync_api import sync_playwright
 
 
-from core.settings.base import BASE_DIR
+from core.settings.base import BASE_DIR, MEDIA_ROOT
 
 
 class AmazonSpider(object):
@@ -29,6 +30,20 @@ class AmazonSpider(object):
 
         # set Playwright browser
         self.PLAYWRIGHT_BROWSERS_PATH = join(BASE_DIR, "temp")
+
+        # creating directory
+        logger.info("Creating temporary directory")
+        try:
+            makedirs(join(BASE_DIR, "temp"))
+        except FileExistsError:
+            pass
+
+         # creating directory
+        logger.info("Creating screenshoot directory directory")
+        try:
+            makedirs(join(MEDIA_ROOT, "screenshoots"))
+        except FileExistsError:
+            pass
 
     def get_response(self, query: str, page_number: int = 1):
         params: dict[str, Any] = {
@@ -186,16 +201,37 @@ class AmazonSpider(object):
 
     def get_product_detail(self, url: str):
         details: list = []
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context()
+            page = context.new_page()
 
-        response = httpx.get(url=url, headers={"User-Agent": self.ua.random}, follow_redirects=True, verify=self.context)
-        logger.info("Process Product Detail on URL: {} Status {}".format(response.url, response.status_code))
+            # process the response
+            page.goto(url=url, wait_until="load")
+            
+            logger.info("Process Product Detail on URL: {}".format(page.url))
 
-        soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
 
-        # save html file
-        f = open(join(BASE_DIR, "response_detail.html"), "w+", encoding="UTF-8")
-        f.write(response.text)
-        f.close()
+            soup: BeautifulSoup = BeautifulSoup(page.content(), "html.parser")
+
+            # save html file
+            f = open(join(BASE_DIR, "response_detail.html"), "w+", encoding="UTF-8")
+            f.write(page.content())
+            f.close()
+
+        # handling blocking here
+        detect_captcha = soup.find("div", attrs={"class": "a-box-inner"}).find("p", attrs={"class": "a-last"}).text.strip()
+        if detect_captcha == "Sorry, we just need to make sure you're not a robot. For best results, please make sure your browser is accepting cookies.":
+            # proses screenshoot
+            page.screenshot(join(join(MEDIA_ROOT, "screenshoot"), "blocking.png"))
+
+            # proses screnshhot dengan solve capcha
+            
+
+
+
+            raise Exception("Captcha detected!")
+        
 
         contents = soup.find(
             "div", attrs={"class": "a-section a-spacing-small a-spacing-top-small"}
