@@ -1,4 +1,4 @@
-FROM library/python:latest
+FROM library/python:3.11.0
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -18,8 +18,12 @@ WORKDIR /app
 RUN pip install --upgrade pip
 
 # handler for machine learning
-RUN ppip install torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cpu --no-cache-dir
+
 
 ADD . /app/
-RUN pip install poetry charset-normalizer easyocr --no-cache-dir
+RUN pip install poetry charset-normalizer --no-cache-dir
 RUN poetry install
+
+RUN pip install torch --index-url https://download.pytorch.org/whl/nightly/cpu --no-cache-dir
+RUN pip install torchvision==0.2.2.post3 --no-cache-dir
+RUN pip install easyocr --no-cache-dir
