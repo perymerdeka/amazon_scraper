@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: "api-prod-db"
+    restart: on-failure
+    image: postgres:15
+    env_file:
+      - .env
+    ports:
+      - 5434:${DB_PORT}
+    volumes:
+    - data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_NAME=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PWD}
+      - POSTGRES_DB=${DB_NAME}
+    networks:
+      - api-network
+  web:
+    container_name: "api-web"
+    restart: always
+    build:
+      context: .
+    working_dir: /app/src
+    command:  gunicorn core.wsgi:application --bind ${APP_IP}:${APP_PORT}
+    volumes:
+      - .:/app
+      - static_volume:/app/src/staticfiles
+      - media_volume:/app/src/media
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    expose:
+      - ${APP_PORT}
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - api-network
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/app/src/staticfiles
+      - media_volume:/app/src/media
+    container_name: api-nginx
+    env_file:
+      - .env
+    ports:
+      - 1338:80
+    depends_on:
+      - web
+    networks:
+      - api-network
+networks:
+    api-network:
+        driver: bridge
+volumes:
+  data:
+  static_volume:
+  media_volume:
